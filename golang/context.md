@@ -1,5 +1,5 @@
 > * 原文地址：[官方文档 context](https://golang.org/pkg/context/)
-> * 译文地址：
+> * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/golang/context.md)
 > * 译者：咔叽咔叽  
 > * 译者水平有限，如有翻译或理解谬误，烦请帮忙指出
 

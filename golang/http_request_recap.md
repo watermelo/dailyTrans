@@ -1,6 +1,6 @@
 > * 原文地址：[https://www.alexedwards.net/blog/a-recap-of-request-handling](https://www.alexedwards.net/blog/a-recap-of-request-handling)
 > * 原文作者：[Alex Edwards](https://www.alexedwards.net/)
-> * 译文地址：
+> * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/golang/http_request_recap.md)
 > * 译者：咔叽咔叽  
 > * 译者水平有限，如有翻译或理解谬误，烦请帮忙指出
 
