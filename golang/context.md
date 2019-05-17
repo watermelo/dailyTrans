@@ -68,8 +68,8 @@ import (
 )
 
 func main() {
-	// gen在单独的goroutine中生成整数并将它们发送到返回的channel。
-	// 一旦消费了生成的整数，gen的调用者需要取消上下文，从而不会泄漏gen启动的内部goroutine。
+	// gen 在单独的 goroutine 中生成整数并将它们发送到返回的 channel。
+	// 一旦消费了生成的整数，gen 的调用者需要取消上下文，从而不会泄漏 gen 启动的内部 goroutine。
 	gen := func(ctx context.Context) <-chan int {
 		dst := make(chan int)
 		n := 1
@@ -77,7 +77,7 @@ func main() {
 			for {
 				select {
 				case <-ctx.Done():
-					return // 返回以致不泄露goroutine
+					return // 返回以致不泄露 goroutine
 				case dst <- n:
 					n++
 				}
@@ -126,7 +126,7 @@ func main() {
 	d := time.Now().Add(50 * time.Millisecond)
 	ctx, cancel := context.WithDeadline(context.Background(), d)
 
-	// 即使ctx将要过期，在任何情况下要好也最调用它的取消函数。
+	// 即使 ctx 将要过期，在任何情况下最好也要调用它的取消函数。
 	// 如果不这样做，可能会使上下文及其父级的活动时间超过必要时间。
 	defer cancel()
 
@@ -155,7 +155,7 @@ WithTimeout 返回 WithDeadline(parent, time.Now().Add(timeout))。
 ```golang
 func slowOperationWithTimeout(ctx context.Context) (Result, error) {
 	ctx, cancel := context.WithTimeout(ctx, 100*time.Millisecond)
-	defer cancel()  // 如果slowOperation在超时之前完成，则释放资源
+	defer cancel()  // 如果 slowOperation 在超时之前完成，则释放资源
 completes before timeout elapses
 	return slowOperation(ctx)
 }

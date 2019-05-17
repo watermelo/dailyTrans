@@ -38,7 +38,7 @@ func main() {
   log.Println("Listening...")
   http.ListenAndServe(":3000", mux)
 }
-```plain
+```
 
 让我们快速介绍一下：
 - 在`main`函数中，我们使用[http.NewServeMux](http://golang.org/pkg/net/http/#NewServeMux)函数创建了一个空的ServeMux。
@@ -109,7 +109,7 @@ func main() {
   log.Println("Listening...")
   http.ListenAndServe(":3000", mux)
 }
-```plain
+```
 
 在`main`函数中，我们使用`＆`符号生成指针，用与普通结构完全相同的方式初始化`timeHandler`。然后，与前面的示例一样，我们使用`mux.Handle`函数将其注册到我们的ServeMux。
 
@@ -169,7 +169,7 @@ func main() {
   log.Println("Listening...")
   http.ListenAndServe(":3000", mux)
 }
-```plain
+```
 
 事实上，将函数转换为HandlerFunc类型，然后将其添加到ServeMux的情况比较常见，Go提供了一个快捷的转换方法：[mux.HandleFunc](http://golang.org/pkg/net/http/#ServeMux.HandleFunc)方法。
 
@@ -219,7 +219,7 @@ func main() {
   log.Println("Listening...")
   http.ListenAndServe(":3000", mux)
 }
-```plain
+```
 
 `timeHandler`函数现在有一点点不同。现在使用它来返回handler，而不是将函数强制转换为handler（就像我们之前所做的那样）。能这么做有两个关键点。
 
@@ -303,7 +303,7 @@ func main() {
   // And pass nil as the handler to ListenAndServe.
   http.ListenAndServe(":3000", nil)
 }
-```plain
+```
 
 如果你喜欢这篇博文，请不要忘记查看我的新书[《用 Go 构建专​​业的 Web 应用程序》](https://lets-go.alexedwards.net/)！
 
