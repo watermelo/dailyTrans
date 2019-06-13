@@ -88,27 +88,27 @@ func gcStart(trigger gcTrigger) {
 
 这就解释了为什么在调用 GC 时性能较低。因为每次 GC 运行时都会清理 pool 对象（译者注：pool 对象的生存时间介于两次 GC 之间）。[文档](https://golang.org/pkg/sync/#Pool)也告知我们：
 
-> 存储在池中的任何内容都可以在不通知的情况下随时自动被删除
+> 存储在池中的任何内容都可以在不被通知的情况下随时自动删除
 
 现在，让我们创建一个流程图以了解池的管理方式：
 
 ![sync.Pool workflow in Go 1.12](https://user-gold-cdn.xitu.io/2019/6/12/16b4b385f69fc500?w=1426&h=1256&f=png&s=234798)
 
-对于我们创建的每个 `sync.Pool`，go 生成一个连接到每个处理器(译者注：处理器即 Go 中调度模型 GMP 的 P)的内部池 `poolLocal`。此内部池由两个属性组成：`private` 和 `shared`。第一个只能由其所有者访问（push 和 pop 不需要任何锁），而 `shared` 属性可由任何其他处理器读取，并且需要并发安全。实际上，池不是简单的本地缓存，它可以被我们的应用程序中的任何 线程/goroutines 使用。
+对于我们创建的每个 `sync.Pool`，go 生成一个连接到每个处理器(译者注：处理器即 Go 中调度模型 GMP 的 P，pool 里实际存储形式是 `[P]poolLocal`)的内部池 `poolLocal`。该结构由两个属性组成：`private` 和 `shared`。第一个只能由其所有者访问（push 和 pop 不需要任何锁），而 `shared` 属性可由任何其他处理器读取，并且需要并发安全。实际上，池不是简单的本地缓存，它可以被我们的应用程序中的任何 线程/goroutines 使用。
 
 Go 的 1.13 版本将改进 `shared` 的访问，并且还将带来一个新的缓存，以解决 GC 和池清理相关的问题。
 
 ## 新的无锁池和 victim 缓存
-Go 1.13 版将一个[新的双向链表](https://github.com/golang/go/commit/d5fd2dd6a17a816b7dfd99d4df70a85f1bf0de31#diff-491b0013c82345bf6cfa937bd78b690d)做为共享池，这次改动删除了锁并改善了`shared` 的访问。（译者注：关于 victim 缓存的[介绍](https://www.quora.com/What-is-a-victim-cache)）以下是共享访问的新工作流程：
+Go 1.13 版将 `shared` 用一个[双向链表](https://github.com/golang/go/commit/d5fd2dd6a17a816b7dfd99d4df70a85f1bf0de31#diff-491b0013c82345bf6cfa937bd78b690d)`poolChain`作为储存结构，这次改动删除了锁并改善了 `shared`  的访问。以下是 `shared` 访问的新流程：
 
 
 ![new shared pools in Go 1.13](https://user-gold-cdn.xitu.io/2019/6/12/16b4acb3a4ad0e2a?w=800&h=177&f=png&s=16567)
 
-使用这个新的链式池，每个处理器在其队列的头部 push 和 pop，而 `shared` 的访问将从尾部 pop。由于 `next`/`prev` 属性，队列的头部可以通过分配一个两倍大的新结构来扩容，该结构将链接到前一个结构。初始结构的默认大小为 8。这意味着第二个结构将是 16，第三个结构 32，依此类推。
+使用这个新的链式结构池，每个处理器可以在其 `shared` 队列的头部 push 和 pop，而其他处理器访问 `shared` 只能从尾部 pop。由于 `next`/`prev` 属性，`shared` 队列的头部可以通过分配一个两倍大的新结构来扩容，该结构将链接到前一个结构。初始结构的默认大小为 8。这意味着第二个结构将是 16，第三个结构 32，依此类推。
 
-此外，现在不需要锁了，代码可以依赖于原子操作。
+此外，现在 `poolLocal` 结构不需要锁了，代码可以依赖于原子操作。
 
-关于新加的 victim 缓存，新策略非常简单。现在有两组池：活动池和存档池。当 GC 运行时，它会将每个池的引用保留到该池中的新属性，然后在清理当前池之前将该组池复制到已存档的池：
+关于新加的 victim 缓存（译者注：关于引入 victim 缓存的 [commit](https://github.com/golang/go/commit/2dcbf8b3691e72d1b04e9376488cef3b6f93b286)，引入该缓存就是为了解决之前 Benchmark 那个问题），新策略非常简单。现在有两组池：活动池和存档池（译者注：`allPools` 和 `oldPools`）。当 GC 运行时，它会将每个池的引用保存到池中的新属性（victim），然后在清理当前池之前将该组池变成存档池：
 
 ```go
 // 从所有 pool 中删除 victim 缓存
@@ -125,7 +125,7 @@ for _, p := range allPools {
    p.localSize = 0
 }
 
-// 具有非空主缓存的池现在具有非空的 victim 缓存，并且没有池具有主缓存
+// 非空主缓存的池现在具有非空的 victim 缓存，并且池的主缓存被清除
 oldPools, allPools = allPools, nil
 ```
 
