@@ -92,7 +92,7 @@ func gcStart(trigger gcTrigger) {
 
 现在，让我们创建一个流程图以了解池的管理方式：
 
-![sync.Pool workflow in Go 1.12](https://user-gold-cdn.xitu.io/2019/6/12/16b4b385f69fc500?w=1426&h=1256&f=png&s=234798)
+![sync.Pool workflow in Go 1.12](![sync.Pool workflow in Go 1.12](https://user-gold-cdn.xitu.io/2019/6/16/16b5c627c6d4d686?w=1452&h=1280&f=png&s=286056))
 
 对于我们创建的每个 `sync.Pool`，go 生成一个连接到每个处理器(译者注：处理器即 Go 中调度模型 GMP 的 P，pool 里实际存储形式是 `[P]poolLocal`)的内部池 `poolLocal`。该结构由两个属性组成：`private` 和 `shared`。第一个只能由其所有者访问（push 和 pop 不需要任何锁），而 `shared` 属性可由任何其他处理器读取，并且需要并发安全。实际上，池不是简单的本地缓存，它可以被我们的应用程序中的任何 线程/goroutines 使用。
 
