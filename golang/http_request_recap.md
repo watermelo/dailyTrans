@@ -6,7 +6,7 @@
 
 使用 Go 处理 HTTP 请求主要涉及两件事：ServeMuxes 和 Handlers。
 
-[ServeMux](http://golang.org/pkg/net/http/#ServeMux)本质上是一个 HTTP 请求路由器（或多路复用器）。它将传入的请求与预定义的 URL 路径列表进行比较，并在找到匹配时调用路径的关联 handler。
+[ServeMux](http://golang.org/pkg/net/http/#ServeMux)本质上是一个 HTTP 路由（或多路复用器）。它将传入的请求与预定义的 URL 路径列表进行比较，当路径匹配上时就调用该路径关联的 handler 进行处理。
 
 handler 负责写入响应头和响应体。几乎任何对象都可以是 handler，只要它满足[http.Handler](http://golang.org/pkg/net/http/#Handler)接口即可。在非专业术语中，这仅仅意味着它必须是一个拥有以下签名的`ServeHTTP`方法：
 
@@ -43,7 +43,7 @@ func main() {
 让我们快速介绍一下：
 - 在`main`函数中，我们使用[http.NewServeMux](http://golang.org/pkg/net/http/#NewServeMux)函数创建了一个空的ServeMux。
 - 然后我们使用[http.RedirectHandler](http://golang.org/pkg/net/http/#RedirectHandler)函数创建一个新的handler。该handler将其接收的所有请求307重定向到http://example.org。
-- 接下来我们使用[mux.Handle](http://golang.org/pkg/net/http/#ServeMux.Handle)函数向我们的新ServeMux注册它，因此它充当URL路径`/foo`的所有传入请求的handler。
+- 接下来我们使用[mux.Handle](http://golang.org/pkg/net/http/#ServeMux.Handle)函数向我们的新ServeMux注册 handler，因此它充当所有传入URL路径`/foo`的所有请求的handler。
 - 最后，我们创建一个新服务并使用[http.ListenAndServe](http://golang.org/pkg/net/http/#ListenAndServe)函数开始监听传入的请求，并传入ServeMux给这个方法以匹配请求。
 
 继续运行应用程序：
@@ -227,7 +227,7 @@ func main() {
 
 其次我们的闭包有签名为`func(http.ResponseWriter, *http.Request)`的函数。你可能还记得，这意味着我们可以将其转换为HandlerFunc类型（以便它满足Handler接口）。然后我们的`timeHandler`函数返回这个转换后的闭包。
 
-在这个例子中，我们仅仅将一个简单的字符串传递给handler。但在实际应用程序中，您可以使用此方法传递数据库连接，模板映射或任何其他应用程序级的上下文。它是全局变量的一个很好的替代方案，并且可以使测试的自包含handler变得更整洁。
+在这个例子中，我们仅仅将一个简单的字符串传递给 handler。但在实际应用程序中，你可以使用此方法传递数据库连接，模板映射或任何其他应用程序级的上下文。它是全局变量的一个很好的替代方案，并且可以使测试的自包含 handler 变得更整洁。
 
 你可能还会看到相同的模式，如下所示：
 
