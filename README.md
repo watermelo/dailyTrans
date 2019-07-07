@@ -9,3 +9,4 @@
 [什么是缓存 false sharing 以及如何解决(Golang 示例)](https://github.com/watermelo/dailyTrans/blob/master/golang/cache_false_sharing.md)  
 [Go：什么是 unsafe 包](https://github.com/watermelo/dailyTrans/blob/master/golang/what_is_unsafe_package.md)  
 [Golang 中的数组和切片指南（及其差异](https://github.com/watermelo/dailyTrans/blob/master/golang/slice_and_arrays_differences.md)    
+[使用 Go 编写一个简单的事件总线](https://github.com/watermelo/dailyTrans/blob/master/golang/go_simple_event_bus.md)  
