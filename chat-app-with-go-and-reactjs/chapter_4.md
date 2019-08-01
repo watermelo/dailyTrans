@@ -1,4 +1,4 @@
-# 处理多客户端
+# 使用 Go 和 ReactJS 构建聊天系统 (四)
 
 > * 原文地址：[Part 4 - Handling Multiple Clients](https://tutorialedge.net/projects/chat-system-in-go-and-react/part-4-handling-multiple-clients/)
 > * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/chat-app-with-go-and-reactjs/chapter_4.md)

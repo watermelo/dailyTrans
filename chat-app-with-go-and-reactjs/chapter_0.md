@@ -1,4 +1,4 @@
-# 课程：使用 Go 和 ReactJS 构建聊天系统
+# 使用 Go 和 ReactJS 构建聊天系统 (前言)
 
 > * 原文地址：[Course: Building a Chat Application in Go with ReactJS](https://tutorialedge.net/projects/chat-system-in-go-and-react/)
 > * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/chat-app-with-go-and-reactjs/chapter_0.md)

@@ -1,4 +1,4 @@
-# 优化前端
+# 使用 Go 和 ReactJS 构建聊天系统 (五)
 
 > * 原文地址：[Part 5 - Improving the Frontend](https://tutorialedge.net/projects/chat-system-in-go-and-react/part-5-improved-frontend/)
 > * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/chat-app-with-go-and-reactjs/chapter_5.md)

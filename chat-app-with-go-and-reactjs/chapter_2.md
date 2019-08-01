@@ -1,4 +1,4 @@
-# 后端实现
+# 使用 Go 和 ReactJS 构建聊天系统 (二)
 
 > * 原文地址：[Part 2 - Simple Communication](https://tutorialedge.net/projects/chat-system-in-go-and-react/part-2-simple-communication/)
 > * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/chat-app-with-go-and-reactjs/chapter_2.md)

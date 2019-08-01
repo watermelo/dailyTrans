@@ -1,4 +1,4 @@
-# Part 1 - 初始化设置
+# 使用 Go 和 ReactJS 构建聊天系统 (一)
 
 > * 原文地址：[Part 1 - Initial Setup](https://tutorialedge.net/projects/chat-system-in-go-and-react/part-1-initial-setup/)
 > * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/chat-app-with-go-and-reactjs/chapter_1.md)

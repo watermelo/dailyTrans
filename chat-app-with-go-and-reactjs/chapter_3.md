@@ -1,4 +1,4 @@
-# 前端实现
+# 使用 Go 和 ReactJS 构建聊天系统 (三)
 
 > * 原文地址：[Part 3 - Designing our Frontend](https://tutorialedge.net/projects/chat-system-in-go-and-react/part-3-designing-our-frontend/)
 > * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/chat-app-with-go-and-reactjs/chapter_3.md)
