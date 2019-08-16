@@ -1,5 +1,8 @@
 ## 日常翻译
 
+### 数据库相关
+[使用 PostgreSQL 的一些建议](https://github.com/watermelo/dailyTrans/blob/master/db/postgresql_dont_do_this.md)
+
 ### Go 相关
 [Go 中的 HTTP 请求处理概述](https://github.com/watermelo/dailyTrans/blob/master/golang/http_request_recap.md)  
 [官方文档 context](https://github.com/watermelo/dailyTrans/blob/master/golang/context.md)  
