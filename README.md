@@ -15,4 +15,5 @@
 [使用 Go 编写一个简单的事件总线](https://github.com/watermelo/dailyTrans/blob/master/golang/go_simple_event_bus.md)  
 [Dave 谈 Go：清晰胜过聪明](https://github.com/watermelo/dailyTrans/blob/master/golang/clear_better_than_clever.md)  
 [使用 Go 和 ReactJS 构建聊天应用系列教程](https://github.com/watermelo/dailyTrans/blob/master/chat-app-with-go-and-reactjs/chapter_0.md)  
-[Go 实现百万 WebSocket 连接](https://github.com/watermelo/dailyTrans/blob/master/golang/a_million_websockets_and_go.md)  
+[Go 实现百万 WebSocket 连接](https://github.com/watermelo/dailyTrans/blob/master/golang/a_million_websockets_and_go.md)   
+[# Go：方法接收者应该使用 T 还是 *T](https://github.com/watermelo/dailyTrans/blob/master/golang/method_use_T_or_pointer_T.md) 
