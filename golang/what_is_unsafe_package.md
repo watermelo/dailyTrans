@@ -1,129 +1,185 @@
-> * 原文地址：[https://medium.com/@blanchon.vincent/go-what-is-the-unsafe-package-d2443da36350](https://medium.com/@blanchon.vincent/go-what-is-the-unsafe-package-d2443da36350)
-> * 原文作者：[Vincent Blanchon](https://medium.com/@blanchon.vincent)
-> * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/golang/sync_pool_understand.md)
+> * 原文地址：[https://peter.bourgon.org/blog/2019/09/11/programming-with-errors.html](https://peter.bourgon.org/blog/2019/09/11/programming-with-errors.html)
+> * 原文作者：[Peter](https://peter.bourgon.org/about/)
+> * 译文地址：[https://github.com/watermelo/dailyTrans](https://github.com/watermelo/dailyTrans/blob/master/golang/programming_with_errors.md)
 > * 译者：咔叽咔叽  
 > * 译者水平有限，如有翻译或理解谬误，烦请帮忙指出
 
-ℹ️本文基于 Go 1.12。
+Go 1.13 引入了一个增强的[package errors](https://golang.org/pkg/errors/)，大致标准化了错误处理。就个人而言，我觉得它的 API 令人有点困惑。本文提供一些如何更有效使用它的参考。
 
-看到 Unsafe 这个名称，我们应该尽量避免使用它。想要知道使用 Unsafe 包可能产生不安全的原因，我们首先来看看官方文档的描述：
-
-> unsafe 包含有违背 Go 类型安全的操作。  
-导入 unsafe 包可能会使程序不可移植，并且不受 Go 1 兼容性指南的保护。
-
-因此，该名称被用作提示 unsafe 包可能带来 Go 类型的不安全性。现在我们来深入探讨一下文档中提到的两点。
-
-## 类型安全
-在 Go 中，每个变量都有一个类型，可以在分配给另一个变量之前转换为另一个类型。在此转换期间，Go 会对此数据执行转换，以适应请求的类型。来看下面这个例子：
+## 创建 errors
+sentinel errors（译者注：表示在此错误中断，程序不会继续往下处理）和以前一样。将它们命名为 ErrXxx，使用 errors.New 来创建它们。
 
 ```go
-var i int8 = -1 // -1 二进制表示: 11111111
-var j = int16(i) // -1 二进制表示: 11111111 11111111
-println(i, j) // -1 -1
+var ErrFoo = errors.New("foo error")
 ```
 
-`unsafe` 包让我们可以直接访问此变量的内存，并将原始二进制值存储在此地址中。在绕过类型约束时，我们可以根据需要使用它：
+错误类型基本上也和以前一样。将它们命名为 XxxError，并确保它们具有 Error 方法，以满足 error 接口。
 
 ```go
-var k uint8 = *(*uint8)(unsafe.Pointer(&i))
-println(k) // 255 is the uint8 value for the binary 11111111
-```
-
-现在，原始值被解释为 uint8，而没有使用先前声明的类型（int8）。如果你有兴趣深入了解此主题，我建议你阅读我关于[使用 Go 进行 Cast 和 Conversion](https://medium.com/@blanchon.vincent/go-cast-vs-conversion-by-example-26e0ef3003f0)的文章。
-
-## Go 1 兼容性指南
-[Go 1 的指南](https://golang.org/doc/go1compat#expectations)清楚地解释了如果你的代码使用了 `unsafe`包， 在更改实现之后可能会破坏你的代码：
-
-> 导入`unsafe`软件包可能取决于 Go 实现的内部属性。 我们保留对可能导致程序崩溃的实现进行修改的权利。
-
-我们应该记住，在 Go 1 中，内部实现可能会发生变化，我们可能会遇到像这个[Github issue](https://github.com/golang/go/issues/16769)中类似的问题，两个版本之间的行为略有变化。但是，Go 标准库在许多地方也使用了 `unsafe` 包。
-
-## 在 Go 的 reflect 包中使用
-`reflection` 包是最常用的包之一。反射基于空接口包含的内部数据。要读取数据，Go 只是将我们的变量转换为空接口，并通过将与空接口的内部表示匹配的结构和指针地址处的内存映射来读取它们：
-
-```go
-func ValueOf(i interface{}) Value {
-   [...]
-   return unpackEface(i)
+type BarError struct {
+    Reason string
 }
-// unpackEface converts the empty interface i to a Value.
-func unpackEface(i interface{}) Value {
-   e := (*emptyInterface)(unsafe.Pointer(&i))
-   [...]
+
+func (e BarError) Error() string {
+    return fmt.Sprintf("bar error: %s", e.Reason)
 }
 ```
 
-变量`e`现在包含有关值的所有信息，例如类型或是否已导出值。反射还使用`unsafe`包通过直接更新内存中的值来修改反射变量的值，如前所述。
-
-## 在 Go 的 sync 包中使用
-`unsafe` 包的另一个有趣用法是在`sync`包中。如果你不熟悉 `sync` 包，我建议你阅读我的[sync.Pool 的设计](https://juejin.im/post/5d006254e51d45776031afe3)的一篇文章。
-
-这些池通过一段内存在所有 goroutine/processors 之间共享，所有 goroutine 都可以通过`unsafe`包访问：
+如果你的错误类型包装了另一个错误，就需要提供 Unwrap 方法。
 
 ```go
-func indexLocal(l unsafe.Pointer, i int) *poolLocal {
-   lp := unsafe.Pointer(uintptr(l) + uintptr(i)*unsafe.Sizeof(poolLocal{}))
-   return (*poolLocal)(lp)
+type BazError struct {
+    Reason string
+    Inner  error
+}
+
+func (e BazError) Error() string {
+    if e.Inner != nil {
+        return fmt.Sprintf("baz error: %s: %v", e.Reason, e.Inner)
+    }
+    return fmt.Sprintf("baz error: %s", e.Reason)
+}
+
+func (e BazError) Unwrap() error {
+    return e.Inner
 }
 ```
 
-变量 `l` 是内存段，`i` 是处理器编号。函数 `indexLocal` 只读取此内存段 - 包含 X（处理器数量）`poolLocal` 结构 - 具有与其读取的索引相关的偏移量。存储指向完整内存段的指针是实现共享池的一种非常轻松的方法。
-
-## 在 Go 的 runtime 包中使用
-Go 还在 `runtime` 包中使用了 `unsafe` 包，因为它必须处理内存操作，如堆栈分配或释放堆栈内存。堆栈在其结构中由两个边界表示：
+## 包装和返回错误
+默认情况下，当你在函数中遇到错误并需要将其返回给调用者时，可以通过 [fmt.Errorf](https://golang.org/pkg/fmt/#Errorf) 的 `％w` 格式，使用相关上下文包装错误。
 
 ```go
-type stack struct {
-   lo uintptr
-   hi uintptr
+func process(j Job) error {
+    result, err := preprocess(j)
+    if err != nil {
+         return fmt.Errorf("error preprocessing job: %w", err)
+    }
+```
+
+此过程称为错误注解。需要避免返回未注解的错误，因为这可能使调用者不知道出错的地方在哪里。
+
+另外，考虑通过自定义错误类型（如上面的 BazError）包装错误，以获得更复杂的用例。
+
+```go
+p := getPriority()
+widget, err := manufacture(p, result)
+if err != nil {
+    return ManufacturingError{Priority: p, Error: err}
 }
 ```
 
-那么 `unsafe` 包将有助于进行操作：
+## 错误检查
+大多数情况下，当你收到错误时，不需要关心细节。如果你的代码执行失败了，你需要报出错误（例如记录它）并继续;或者，如果无法继续，可以使用上下文来注解错误，并将其返回给调用者。
+
+如果你想知道收到的是哪个错误，可以用 [errors.Is](https://golang.org/pkg/errors/#Is) 检查 sentinel errors，也可以用 [errors.As](https://golang.org/pkg/errors/#As)来检查错误值。
 
 ```go
-func stackfree(stk stack) {
-   [...]
-   v := unsafe.Pointer(stk.lo)
-   n := stk.hi - stk.lo
-   // 然后基于指向堆栈的指针释放内存
-   [...]
+err := f()
+if errors.Is(err, ErrFoo) {
+    // you know you got an ErrFoo
+    // respond appropriately
+}
+
+var bar BarError
+if errors.As(err, &bar) {
+    // you know you got a BarError
+    // bar's fields are populated
+    // respond appropriately
 }
 ```
 
-如果你想进一步了解堆栈，我建议你阅读我关于[堆栈大小及其管理的文章](https://medium.com/@blanchon.vincent/go-how-does-the-goroutine-stack-size-evolve-447fc02085e5)。
+errors.Is 和 errors.As 会尝试以递归的方式解包错误来找到匹配项。[此代码](https://play.golang.org/p/GorSR6HTWzf)**演示了基本的错误包装和检查技术**（译者注：需要科学上网，把这段代码贴到文章末尾了）。查看 `func a()` 中检查的顺序，然后尝试更改 `func c()` 返回的错误，以获得关于运行的流程。
 
-此外，在某些情况下，我们也可以在我们的应用程序中使用此包，例如结构之间的转换。
+正如[文档](https://golang.org/pkg/errors/)所述，更偏向使用 errors.Is 来检查普通等式，例如 `if err == ErrFoo` ;更偏向使用 errors.As 来断言普通类型，例如 `if e，ok := err.(MyError)`，因为普通版本不执行 unwrap 操作。如果你明确不希望调用者 unwrap 错误，可以为 `fmt.Errorf` 提供不同的格式化动词，例如 `％v` ;或者不要在错误类型上提供 `Unwrap` 方法。但这些例不是常见的。
 
-## unsafe 包对开发人员的用处
-`unsafe` 包的一个很好的用法是使用相同的底层数据转换两个不同的结构，这是转换器无法实现的：
-
+## 示例
 ```go
-type A struct {
-   A int8
-   B string
-   C float32
+package main
 
-}
-
-type B struct {
-   D int8
-   E string
-   F float32
-
-}
+import (
+	"errors"
+	"fmt"
+	"log"
+)
 
 func main() {
-   a := A{A: 1, B: `foo`, C: 1.23}
-   //b := B(a) 不能转换 a (type A) 到 type B
-   b := *(*B)(unsafe.Pointer(&a))
+	i, err := a()
+	log.Printf("i=%d err=%v", i, err)
+}
 
-   println(b.D, b.E, b.F) // 1 foo 1.23
+//
+//
+//
+
+func a() (int, error) {
+	i, err := b()
+	if errors.Is(err, ErrFoo) {
+		return 0, fmt.Errorf("tragedy: %w", err)
+	}
+
+	var bar BarError
+	if errors.As(err, &bar) {
+		return 0, fmt.Errorf("comedy: %w", err)
+	}
+
+	var baz BazError
+	if errors.As(err, &baz) {
+		return 0, fmt.Errorf("farce: %w", err)
+	}
+
+	return i, nil
+}
+
+func b() (int, error) {
+	if err := c(); err != nil {
+		return 0, fmt.Errorf("error executing c: %w", err)
+	}
+	return 1, nil
+}
+
+func c() error {
+	// return ErrFoo
+	// return BarError{Reason: "😫"}
+	// return BazError{Reason: "☹️"}
+	return BazError{Reason: "😟", Inner: ErrFoo}
+}
+
+//
+//
+//
+
+var ErrFoo = errors.New("foo error")
+
+//
+//
+//
+
+type BarError struct {
+	Reason string
+}
+
+func (e BarError) Error() string {
+	return fmt.Sprintf("bar error: %s", e.Reason)
+}
+
+//
+//
+//
+
+type BazError struct {
+	Reason string
+	Inner  error
+}
+
+func (e BazError) Unwrap() error {
+	fmt.Println("fuck")
+	return e.Inner
+}
+
+func (e BazError) Error() string {
+	if e.Inner != nil {
+		return fmt.Sprintf("baz error: %s: %v", e.Reason, e.Inner)
+	}
+	return fmt.Sprintf("baz error: %s", e.Reason)
 }
 ```
-
-源码：[https://play.golang.org/p/sjeO9v0T_Fs](https://play.golang.org/p/sjeO9v0T_Fs)
-
-`unsafe` 包中另一个不错的用法是[http://golang-sizeof.tips](http://golang-sizeof.tips)，它可以帮助你理解结构内存补齐的大小。
-
-总之，该软件包非常有趣且功能强大，但是应该谨慎使用。此外，如果你对`unsafe`包的将来的修改有建议，你可以在[Github for Go 2](https://github.com/golang/go/issues?utf8=%E2%9C%93&q=is%3Aopen+label%3AGo2+%22unsafe%22+in%3Atitle)中提 Issue。
