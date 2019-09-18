@@ -16,4 +16,5 @@
 [Dave 谈 Go：清晰胜过聪明](https://github.com/watermelo/dailyTrans/blob/master/golang/clear_better_than_clever.md)  
 [使用 Go 和 ReactJS 构建聊天应用系列教程](https://github.com/watermelo/dailyTrans/blob/master/chat-app-with-go-and-reactjs/chapter_0.md)  
 [Go 实现百万 WebSocket 连接](https://github.com/watermelo/dailyTrans/blob/master/golang/a_million_websockets_and_go.md)   
-[Go：方法接收者应该使用 T 还是 *T](https://github.com/watermelo/dailyTrans/blob/master/golang/method_use_T_or_pointer_T.md) 
+[Go：方法接收者应该使用 T 还是 *T](https://github.com/watermelo/dailyTrans/blob/master/golang/method_use_T_or_pointer_T.md)  
+[Go 1.13 errors 包错误处理](https://github.com/watermelo/dailyTrans/blob/master/golang/programming_with_errors.md)  
