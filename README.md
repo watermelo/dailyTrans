@@ -18,3 +18,4 @@
 [Go 实现百万 WebSocket 连接](https://github.com/watermelo/dailyTrans/blob/master/golang/a_million_websockets_and_go.md)   
 [Go：方法接收者应该使用 T 还是 *T](https://github.com/watermelo/dailyTrans/blob/master/golang/method_use_T_or_pointer_T.md)  
 [Go 1.13 errors 包错误处理](https://github.com/watermelo/dailyTrans/blob/master/golang/programming_with_errors.md)  
+[Go: 监控模式](https://github.com/watermelo/dailyTrans/blob/master/golang/go_nonitor_pattern.md)  
